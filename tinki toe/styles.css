@@ -36,7 +36,7 @@ header h1 {
 /* Scoreboard */
 #scoreboard {
     font-size: 1.5rem;
-    color: #FF4500;
+    color: #fff;
     margin-bottom: 20px;
 }
 
@@ -71,6 +71,27 @@ header h1 {
     transform: scale(1.05);
     background-color: rgba(0, 0, 0, 0.5);
     color: #E63F00;
+}
+
+#level-options {
+    margin-bottom: 20px;
+}
+
+#level-options button {
+    background-color: #FF4500;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin: 5px;
+}
+
+#level-options button:hover {
+    background-color: #E63F00;
+    transform: scale(1.1);
 }
 
 #start-game, #play-again {
@@ -113,6 +134,24 @@ footer {
     width: 200px;
     height: 300px;
     overflow-y: auto;
+}
+
+#result-display {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: #FF4500;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+    z-index: 1000;
+}
+
+#result-display.show {
+    display: block;
 }
 
 /* Media query for mobile devices */
