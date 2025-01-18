@@ -115,21 +115,6 @@ footer {
     overflow-y: auto;
 }
 
-/* BotUI Container */
-.botui-app-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 10px;
-    padding: 10px;
-    color: #FF4500;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
 /* Media query for mobile devices */
 @media (max-width: 768px) {
     body {
@@ -142,7 +127,7 @@ footer {
         left: auto;
         bottom: auto;
         width: 90%;
+        height: 50vh;  /* Increase height on mobile devices */
         margin: 20px auto;
-    
     }
 }
