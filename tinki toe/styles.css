@@ -140,8 +140,8 @@ footer {
     #result-log {
         position: relative;
         left: auto;
-        bottom: auto;
+        bottom: 90px;
         width: 80%;
-        margin: 40px auto;
+        margin: 5px auto;
     }
 }
