@@ -1,23 +1,26 @@
-// script.js
+// Select elements
 const cells = document.querySelectorAll('.cell');
 const startGameButton = document.getElementById('start-game');
 const playAgainButton = document.getElementById('play-again');
-const message = document.getElementById('message');
 const turnInfo = document.getElementById('turn-info');
 const resultLog = document.getElementById('result-log');
+const playerScore = document.getElementById('player-score');
+const aiScore = document.getElementById('ai-score');
 const welcomeAudio = document.getElementById('welcome-audio');
 const historyLessonAudio = document.getElementById('history-lesson-audio');
 const youWinAudio = document.getElementById('you-win-audio');
 const iWinAudio = document.getElementById('i-win-audio');
 const drawAudio = document.getElementById('draw-audio');
-const playerScore = document.getElementById('player-score');
-const aiScore = document.getElementById('ai-score');
+
+// Game state variables
 let currentPlayer = 'X';
 let gameBoard = Array(9).fill(null);
 let gameActive = false;
 let playerWins = 0;
 let aiWins = 0;
+let isFirstGame = true; // Track if it's the first game
 
+// Winning combinations
 const winningCombinations = [
     [0, 1, 2],
     [3, 4, 5],
@@ -29,21 +32,30 @@ const winningCombinations = [
     [2, 4, 6]
 ];
 
+// Attach event listeners to cells
 cells.forEach(cell => {
     cell.addEventListener('click', handleCellClick);
 });
 
+// Attach event listeners to buttons
 startGameButton.addEventListener('click', startGame);
 playAgainButton.addEventListener('click', startGame);
 
 function startGame() {
-    resetGame();  // Reset the game state
+    resetGame(); // Reset the game state
     gameActive = true;
     currentPlayer = 'X';
     turnInfo.textContent = "Your turn!";
     startGameButton.style.display = 'none';
     playAgainButton.style.display = 'none';
-    welcomeAudio.play();
+
+    if (isFirstGame) {
+        // Play audio only for the first game
+        welcomeAudio.play();
+        historyLessonAudio.play();
+        isFirstGame = false; // Set the flag to false after the first game
+    }
+
     appendToResultLog("Game started. Your turn!");
 }
 
@@ -112,10 +124,8 @@ function resetGame() {
     });
     currentPlayer = 'X';
     gameActive = false;
-    turnInfo.textContent = "Press 'Start Game' to play!";
-    message.textContent = '';
-    historyLessonAudio.play();
-    appendToResultLog("Game reset. Press 'Start Game' to play again.");
+    turnInfo.textContent = "Press 'Play Again' to play!";
+    appendToResultLog("Game reset. Press 'Play Again' to play again.");
 }
 
 function makeAIMove() {
