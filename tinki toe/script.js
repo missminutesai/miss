@@ -11,6 +11,9 @@ const historyLessonAudio = document.getElementById('history-lesson-audio');
 const youWinAudio = document.getElementById('you-win-audio');
 const iWinAudio = document.getElementById('i-win-audio');
 const drawAudio = document.getElementById('draw-audio');
+const levelOptions = document.getElementById('level-options');
+const levelButtons = document.querySelectorAll('#level-options button');
+const resultDisplay = document.getElementById('result-display');
 
 // Game state variables
 let currentPlayer = 'X';
@@ -19,6 +22,8 @@ let gameActive = false;
 let playerWins = 0;
 let aiWins = 0;
 let isFirstGame = true; // Track if it's the first game
+let playWithFriend = false; // Track if playing with a friend
+let currentLevel = 1; // Track the current AI level
 
 // Winning combinations
 const winningCombinations = [
@@ -40,6 +45,21 @@ cells.forEach(cell => {
 // Attach event listeners to buttons
 startGameButton.addEventListener('click', startGame);
 playAgainButton.addEventListener('click', startGame);
+levelButtons.forEach(button => button.addEventListener('click', selectLevel));
+
+function selectLevel(event) {
+    const level = event.target.id;
+
+    if (level === 'play-with-friend') {
+        playWithFriend = true;
+    } else {
+        playWithFriend = false;
+        currentLevel = parseInt(level.split('-')[1]); // Get the level number from button id
+    }
+
+    levelOptions.style.display = 'none';
+    startGameButton.style.display = 'block';
+}
 
 function startGame() {
     resetGame(); // Reset the game state
@@ -72,6 +92,7 @@ function handleCellClick(event) {
 
     if (checkWinner()) {
         gameActive = false;
+        displayResult(`${currentPlayer} Wins!`);
         if (currentPlayer === 'X') {
             turnInfo.textContent = "You win!";
             youWinAudio.play();
@@ -88,19 +109,20 @@ function handleCellClick(event) {
         playAgainButton.style.display = 'block';
     } else if (isDraw()) {
         gameActive = false;
+        displayResult("It's a draw!");
         turnInfo.textContent = "It's a draw!";
         drawAudio.play();
         appendToResultLog("It's a draw!");
         playAgainButton.style.display = 'block';
     } else {
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        if (currentPlayer === 'O') {
+        if (!playWithFriend && currentPlayer === 'O') {
             turnInfo.textContent = "Miss Minutes' turn...";
             appendToResultLog("Miss Minutes' turn...");
-            setTimeout(makeAIMove, 1000);
+            setTimeout(() => makeAIMove(currentLevel), 1000);
         } else {
-            turnInfo.textContent = "Your turn!";
-            appendToResultLog("Your turn!");
+            turnInfo.textContent = `Player ${currentPlayer}'s turn!`;
+            appendToResultLog(`Player ${currentPlayer}'s turn!`);
         }
     }
 }
@@ -128,14 +150,28 @@ function resetGame() {
     appendToResultLog("Game reset. Press 'Play Again' to play again.");
 }
 
-function makeAIMove() {
-    const bestMove = findBestMove(gameBoard);
+function makeAIMove(level) {
+    let bestMove;
+    switch (level) {
+        case 1:
+            bestMove = makeAIMoveWithProbability(1); // 1% optimal move
+            break;
+        case 2:
+            bestMove = makeAIMoveWithProbability(20); // 20% optimal move
+            break;
+        case 3:
+            bestMove = makeAIMoveWithProbability(90); // 90% optimal move
+            break;
+        default:
+            bestMove = findBestMove(gameBoard); // 100% optimal move
+    }
     gameBoard[bestMove] = currentPlayer;
     cells[bestMove].textContent = currentPlayer;
     appendToResultLog(`Miss Minutes marked cell ${bestMove}.`);
 
     if (checkWinner()) {
         gameActive = false;
+        displayResult("Miss Minutes Wins!");
         turnInfo.textContent = "Miss Minutes wins!";
         iWinAudio.play();
         aiWins++;
@@ -144,6 +180,7 @@ function makeAIMove() {
         playAgainButton.style.display = 'block';
     } else if (isDraw()) {
         gameActive = false;
+        displayResult("It's a draw!");
         turnInfo.textContent = "It's a draw!";
         drawAudio.play();
         appendToResultLog("It's a draw!");
@@ -152,6 +189,16 @@ function makeAIMove() {
         currentPlayer = 'X';
         turnInfo.textContent = "Your turn!";
         appendToResultLog("Your turn!");
+    }
+}
+
+function makeAIMoveWithProbability(probability) {
+    const random = Math.random() * 100;
+    if (random < probability) {
+        return findBestMove(gameBoard);
+    } else {
+        const emptyCells = gameBoard.map((cell, index) => cell === null ? index : null).filter(index => index !== null);
+        return emptyCells[Math.floor(Math.random() * emptyCells.length)];
     }
 }
 
@@ -220,4 +267,12 @@ function appendToResultLog(message) {
     p.textContent = message;
     resultLog.appendChild(p);
     resultLog.scrollTop = resultLog.scrollHeight; // Scroll to the bottom
+}
+
+function displayResult(message) {
+    resultDisplay.textContent = message;
+    resultDisplay.classList.add('show');
+    setTimeout(() => {
+        resultDisplay.classList.remove('show');
+    }, 3000); // Display result for 3 seconds
 }
