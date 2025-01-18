@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe - Miss Minutes</title>
+    <title>Miss Minutes</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Tic Tac Toe with Miss Minutes</h1>
+            <h1></h1>
         </header>
         <main>
             <div id="scoreboard">
@@ -18,7 +18,13 @@
             <div id="game-info">
                 <p id="turn-info">Press 'Start Game' to play!</p>
             </div>
-            <button id="start-game">Start Game</button>
+            <div id="level-options">
+                <button id="level-1">Easy</button>
+                <button id="level-2">Normal</button>
+                <button id="level-3">Play with Miss Minutes</button>
+                <button id="play-with-friend">Play with a friend</button>
+            </div>
+            <button id="start-game" style="display:none;">Start Game</button>
             <div class="board" id="board">
                 <div class="cell" data-index="0"></div>
                 <div class="cell" data-index="1"></div>
@@ -32,9 +38,10 @@
             </div>
             <button id="play-again" style="display:none;">Play Again?</button>
             <div id="message"></div>
+            <div id="result-display" class="hidden"></div>
         </main>
         <footer>
-            <p>&copy; 2025 TVA</p>
+            <p>&copy; 2025</p>
         </footer>
     </div>
 
@@ -43,28 +50,11 @@
 
     <!-- Audio Files -->
     <audio id="welcome-audio" src="audio/welcome.wav"></audio>
-    <audio id="history-lesson-audio" src="audio/history_lesson.wav"></audio>
+    <audio id="history-lesson-audio" src="audio/history_lesson.mp3"></audio>
     <audio id="you-win-audio" src="audio/you_win.wav"></audio>
     <audio id="i-win-audio" src="audio/i_win.wav"></audio>
     <audio id="draw-audio" src="audio/draw.wav"></audio>
 
     <script src="script.js"></script>
-
-    <script>
-        !function(w, d, s, ...args){
-          var div = d.createElement('div');
-          div.id = 'aichatbot';
-          d.body.appendChild(div);
-          w.chatbotConfig = args;
-          var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s);
-          j.defer = true;
-          j.type = 'module';
-          j.src = 'https://aichatbot.sendbird.com/index.js';
-          f.parentNode.insertBefore(j, f);
-        }(window, document, 'script', '68A8AAD1-7C1C-4337-93CB-15CDB1322EE3', 'eT2CwVTPLqPkBa8iR9BQA', {
-          apiHost: 'https://api-cf-us-1.sendbird.com',
-        });
-        </script>
 </body>
 </html>
