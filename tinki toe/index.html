@@ -56,5 +56,23 @@
     <audio id="draw-audio" src="audio/draw.wav"></audio>
 
     <script src="script.js"></script>
+
+<script>
+!function(w, d, s, ...args){
+  var div = d.createElement('div');
+  div.id = 'aichatbot';
+  d.body.appendChild(div);
+  w.chatbotConfig = args;
+  var f = d.getElementsByTagName(s)[0],
+  j = d.createElement(s);
+  j.defer = true;
+  j.type = 'module';
+  j.src = 'https://aichatbot.sendbird.com/index.js';
+  f.parentNode.insertBefore(j, f);
+}(window, document, 'script', '68A8AAD1-7C1C-4337-93CB-15CDB1322EE3', 'eT2CwVTPLqPkBa8iR9BQA', {
+  apiHost: 'https://api-cf-us-1.sendbird.com',
+});
+</script>
+
 </body>
 </html>
