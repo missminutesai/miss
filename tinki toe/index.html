@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miss Minutes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styletip.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1></h1>
+        </header>
+        <main>
+            <div id="scoreboard">
+                <p>Score: <span id="player-score">0</span> - <span id="ai-score">0</span></p>
+            </div>
+            <div class="clock-container" onclick="toggleTip()">
+                <div class="clock-content">
+                    <p>Tip</p>
+                    <p>Miss</p>
+                    <p>Minutes</p>
+                </div>
+            </div>
+            
+            <div class="tip-modal" id="tipModal">
+                <div class="tip-content">
+                    <button class="close-btn" onclick="toggleTip()">×</button>
+                    <h2>How to Tip Miss Minutes</h2>
+                    <header>
+                        <h1></h1>
+                    </header>
+                    <div class="crypto-tip">
+                        <h3>Bitcoin (BTC) Address</h3>
+                        <p class="address">bc1q6ryj5c4c92upwry478efwew2sv7sezwmz5twvy</p>
+                        <img src="img/btc.png" alt="BTC QR Code">
+                    </div>
+                    <div class="crypto-tip">
+                        <h3>Ethereum (ETH) Address</h3>
+                        <p class="address">0xD190c0479666142b52d2Fa2b95d08fA6B5CD2a10</p>
+                        <img src="img/eth.png" alt="ETH QR Code">
+                    </div>
+                    <div class="crypto-tip">
+                        <h3>Binance Coin (BNB) Address</h3>
+                        <p class="address">0xD190c0479666142b52d2Fa2b95d08fA6B5CD2a10</p>
+                        <img src="img/bnb.png" alt="BNB QR Code">
+                    </div>
+
+                    <div class="crypto-tip">
+                        <h3>Solana (SOL) Address</h3>
+                        <p class="address">92xRnWedv5sWtx4Fa2Qs5wvRrxEh7vMUPe5iyhVjbunS</p>
+                        <img src="img/sol.png" alt="SOL QR Code">
+                    </div>
+
+                    <div class="crypto-tip">
+                        <h3>Tron (TRX) Address</h3>
+                        <p class="address">TRqPFAmPH1CnHeePc9aWziLSLXNh8XG8DM</p>
+                        <img src="img/trx.png" alt="TRX QR Code">
+                    </div>
+                   
+                </div>
+            </div>
+        
+            <script>
+                function toggleTip() {
+                    document.getElementById('tipModal').classList.toggle('active');
+                }
+            </script>
+            <div id="game-info">
+                <p id="turn-info">Press 'Start Game' to play!</p>
+            </div>
+            <div id="level-options">
+                <button id="level-1">Easy</button>
+                <button id="level-2">Normal</button>
+                <button id="level-3">Play with Miss Minutes</button>
+                <button id="play-with-friend">Play with a friend</button>
+            </div>
+            <button id="start-game" style="display:none;">Start Game</button>
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+            <button id="play-again" style="display:none;">Play Again?</button>
+            <div id="message"></div>
+            <div id="result-display" class="hidden"></div>
+        </main>
+        <footer>
+            <p>&copy; 2025</p>
+        </footer>
+    </div>
+
+    <!-- Result Log -->
+    <div id="result-log"></div>
+
+    <!-- Audio Files -->
+    <audio id="welcome-audio" src="audio/welcome.wav"></audio>
+    <audio id="history-lesson-audio" src="audio/history_lesson.mp3"></audio>
+    <audio id="you-win-audio" src="audio/you_win.wav"></audio>
+    <audio id="i-win-audio" src="audio/i_win.wav"></audio>
+    <audio id="draw-audio" src="audio/draw.wav"></audio>
+
+    <script src="script.js"></script>
+
+    <script>
+        !function(w, d, s, ...args){
+          var div = d.createElement('div');
+          div.id = 'aichatbot';
+          d.body.appendChild(div);
+          w.chatbotConfig = args;
+          var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s);
+          j.defer = true;
+          j.type = 'module';
+          j.src = 'https://aichatbot.sendbird.com/index.js';
+          f.parentNode.insertBefore(j, f);
+        }(window, document, 'script', '68A8AAD1-7C1C-4337-93CB-15CDB1322EE3', 'eT2CwVTPLqPkBa8iR9BQA', {
+          apiHost: 'https://api-cf-us-1.sendbird.com',
+        });
+        </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1a1a1a;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 0;
+}
+
+.clock-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #FFA500 0%, #FF4500 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.clock-container:hover {
+    transform: scale(1.05);
+}
+
+.clock-content {
+    text-align: center;
+    color: #1A1A1A;
+    font-size: 10px;
+    line-height: 1;
+}
+
+.tip-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.tip-modal.active {
+    display: flex;
+}
+
+.tip-content {
+    background: #1a1a1a;
+    color: #e6e6e6;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.address {
+    color: orange;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #FFA500;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.crypto-tip {
+    margin-bottom: 20px;
+}
+
+.crypto-tip img {
+    max-width: 250px;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+}
+
+@media screen and (max-width: 360px) {
+    .clock-container {
+        width: 50px;
+        height: 50px;
+    }
+    .clock-content {
+        font-size: 8px;
+    }
+}
