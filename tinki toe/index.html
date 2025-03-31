@@ -101,13 +101,28 @@
 
         .notepad-content {
             width: 100%;
-            height: calc(100% - 40px);
+            height: calc(100% - 80px);
             padding: 10px;
             border: none;
             resize: none;
             font-size: 14px;
             background-color: #333333; /* Shadow Black */
             color: #FFA500; /* Miss Minutes Orange */
+        }
+
+        .notepad-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FF8C00; /* Dark Orange */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .notepad-button:hover {
+            background-color: #FF4500; /* Vibrant Orange */
         }
 
         .clock-container, .extra-button {
@@ -262,6 +277,7 @@
                 <button class="notepad-close" onclick="closeNotepad('notepad1')">X</button>
             </div>
             <textarea id="notepadContent1" class="notepad-content" placeholder="Write your notes here..."></textarea>
+            <button class="notepad-button" onclick="sendNotepadContent('notepadContent1')">Send Notepad 1 Content</button>
         </div>
         <div id="notepad2" class="notepad">
             <div class="notepad-header" id="notepadHeader2">
@@ -269,6 +285,7 @@
                 <button class="notepad-close" onclick="closeNotepad('notepad2')">X</button>
             </div>
             <textarea id="notepadContent2" class="notepad-content" placeholder="Write your notes here..."></textarea>
+            <button class="notepad-button" onclick="sendNotepadContent('notepadContent2')">Send Notepad 2 Content</button>
         </div>
         <div id="notepad3" class="notepad">
             <div class="notepad-header" id="notepadHeader3">
@@ -276,10 +293,11 @@
                 <button class="notepad-close" onclick="closeNotepad('notepad3')">X</button>
             </div>
             <textarea id="notepadContent3" class="notepad-content" placeholder="Write your notes here..."></textarea>
+            <button class="notepad-button" onclick="sendNotepadContent('notepadContent3')">Send Notepad 3 Content</button>
         </div>
 
         <div class="file-upload-container">
-            <form id="fileUploadForm" action="your-form-endpoint" method="post" enctype="multipart/form-data">
+            <form id="fileUploadForm" action="https://api.comfyform.com/s/67d22b9a26da4737ba026920/" method="post" enctype="multipart/form-data">
                 <input type="file" id="fileUploadInput" name="file" style="display:none;" onchange="uploadFile()">
                 <button type="button" class="file-upload-button" onclick="document.getElementById('fileUploadInput').click();">Upload File</button>
             </form>
@@ -289,8 +307,8 @@
     <script src="script.js"></script>
 
     <script>
-        const correctPassword = "yourpassword"; // Set your password here
-        const notepadPassword = "notepadpassword"; // Set your notepad password here
+        const correctPassword = "love"; // Set your password here
+        const notepadPassword = "love"; // Set your notepad password here
 
         document.addEventListener('DOMContentLoaded', (event) => {
             document.getElementById('passwordContainer').style.display = 'flex';
@@ -299,113 +317,4 @@
         function validatePassword() {
             const inputPassword = document.getElementById('passwordInput').value;
             const errorMessage = document.getElementById('errorMessage');
-            const passwordContainer = document.getElementById('passwordContainer');
-            const contentContainer = document.getElementById('contentContainer');
-
-            if (inputPassword === correctPassword) {
-                passwordContainer.style.display = 'none';
-                contentContainer.style.display = 'flex';
-                errorMessage.innerHTML = '';
-            } else {
-                errorMessage.innerHTML = 'Incorrect password. Please try again.';
-            }
-        }
-
-        function validateNotepadPassword() {
-            const inputPassword = document.getElementById('notepadPasswordInput').value;
-            const errorMessage = document.getElementById('notepadErrorMessage');
-            const notepadPasswordContainer = document.getElementById('notepadPasswordContainer');
-            const notepads = document.querySelectorAll('.notepad');
-
-            if (inputPassword === notepadPassword) {
-                notepadPasswordContainer.style.display = 'none';
-                notepads.forEach(notepad => notepad.style.display = 'block');
-                errorMessage.innerHTML = '';
-            } else {
-                errorMessage.innerHTML = 'Incorrect password. Please try again.';
-            }
-        }
-
-        function closeNotepad(notepadId) {
-            document.getElementById(notepadId).style.display = 'none';
-        }
-
-        function toggleTip() {
-            var modal = document.getElementById('tipModal');
-            modal.style.display = (modal.style.display === "block") ? "none" : "block";
-        }
-
-        function redirectToPage() {
-            window.open("https://pump.fun/coin/GGF2SUiwWnBqzuAZjx4pZcqBNFstNgRgQM8PCXM3pump", "_blank");
-        }
-
-        function moveButton(button) {
-            var x = Math.floor(Math.random() * (window.innerWidth - button.offsetWidth));
-            var y = Math.floor(Math.random() * (window.innerHeight - button.offsetHeight));
-            button.style.left = x + 'px';
-            button.style.top = y + 'px';
-        }
-
-        function startButtonMovement() {
-            var buttons = document.querySelectorAll('.clock-container, .extra-button');
-            buttons.forEach(button => {
-                setInterval(() => moveButton(button), 2000);
-            });
-        }
-
-        function uploadFile() {
-            document.getElementById('fileUploadForm').submit();
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var clockContainers = document.querySelectorAll('.clock-container, .extra-button');
-            clockContainers.forEach(container => {
-                container.addEventListener('click', redirectToPage);
-            });
-            startButtonMovement();
-
-            const notepads = [
-                { notepad: document.getElementById('notepad1'), header: document.getElementById('notepadHeader1'), content: document.getElementById('notepadContent1') },
-                { notepad: document.getElementById('notepad2'), header: document.getElementById('notepadHeader2'), content: document.getElementById('notepadContent2') },
-                { notepad: document.getElementById('notepad3'), header: document.getElementById('notepadHeader3'), content: document.getElementById('notepadContent3') },
-            ];
-
-            notepads.forEach(({ notepad, header, content }, index) => {
-                let isDragging = false;
-                let offsetX, offsetY;
-
-                header.addEventListener('mousedown', (e) => {
-                    isDragging = true;
-                    offsetX = e.clientX - notepad.offsetLeft;
-                    offsetY = e.clientY - notepad.offsetTop;
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                });
-
-                function onMouseMove(e) {
-                    if (!isDragging) return;
-                    notepad.style.left = `${e.clientX - offsetX}px`;
-                    notepad.style.top = `${e.clientY - offsetY}px`;
-                }
-
-                function onMouseUp() {
-                    isDragging = false;
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                }
-
-                // Auto-save functionality
-                content.addEventListener('input', () => {
-                    localStorage.setItem(`notepadContent${index+1}`, content.value);
-                });
-
-                // Load saved content
-                const savedContent = localStorage.getItem(`notepadContent${index+1}`);
-                if (savedContent) {
-                    content.value = savedContent;
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+            const passwordContainer = document.getElementBy* ▋
