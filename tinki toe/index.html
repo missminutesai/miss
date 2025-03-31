@@ -65,11 +65,14 @@
             top: 50px;
             left: 50px;
             width: 300px;
+            height: 200px;
             background-color: #FFA500; /* Miss Minutes Orange */
             border: 1px solid #333333; /* Shadow Black */
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
+            resize: both;
+            overflow: auto;
         }
 
         .notepad-header {
@@ -98,11 +101,9 @@
 
         .notepad-content {
             width: 100%;
-            height: 200px;
+            height: calc(100% - 40px);
             padding: 10px;
             border: none;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
             resize: none;
             font-size: 14px;
             background-color: #333333; /* Shadow Black */
@@ -235,20 +236,34 @@
         <audio id="i-win-audio" src="audio/i_win.wav"></audio>
         <audio id="draw-audio" src="audio/draw.wav"></audio>
     
-        <div id="notepad" class="notepad">
-            <div class="notepad-header" id="notepadHeader">
-                <span class="notepad-title">Notepad</span>
-                <button class="notepad-close" onclick="closeNotepad()">X</button>
+        <div id="notepad1" class="notepad">
+            <div class="notepad-header" id="notepadHeader1">
+                <span class="notepad-title">Notepad 1</span>
+                <button class="notepad-close" onclick="closeNotepad('notepad1')">X</button>
             </div>
-            <textarea id="notepadContent" class="notepad-content" placeholder="Write your notes here..."></textarea>
+            <textarea id="notepadContent1" class="notepad-content" placeholder="Write your notes here..."></textarea>
+        </div>
+        <div id="notepad2" class="notepad">
+            <div class="notepad-header" id="notepadHeader2">
+                <span class="notepad-title">Notepad 2</span>
+                <button class="notepad-close" onclick="closeNotepad('notepad2')">X</button>
+            </div>
+            <textarea id="notepadContent2" class="notepad-content" placeholder="Write your notes here..."></textarea>
+        </div>
+        <div id="notepad3" class="notepad">
+            <div class="notepad-header" id="notepadHeader3">
+                <span class="notepad-title">Notepad 3</span>
+                <button class="notepad-close" onclick="closeNotepad('notepad3')">X</button>
+            </div>
+            <textarea id="notepadContent3" class="notepad-content" placeholder="Write your notes here..."></textarea>
         </div>
     </div>
 
     <script src="script.js"></script>
 
     <script>
-        const correctPassword = "love"; // Set your password here
-        const notepadPassword = "mylove"; // Set your notepad password here
+        const correctPassword = "yourpassword"; // Set your password here
+        const notepadPassword = "notepadpassword"; // Set your notepad password here
 
         document.addEventListener('DOMContentLoaded', (event) => {
             document.getElementById('passwordContainer').style.display = 'flex';
@@ -273,11 +288,11 @@
             const inputPassword = document.getElementById('notepadPasswordInput').value;
             const errorMessage = document.getElementById('notepadErrorMessage');
             const notepadPasswordContainer = document.getElementById('notepadPasswordContainer');
-            const notepad = document.getElementById('notepad');
+            const notepads = document.querySelectorAll('.notepad');
 
             if (inputPassword === notepadPassword) {
                 notepadPasswordContainer.style.display = 'none';
-                notepad.style.display = 'block';
+                notepads.forEach(notepad => notepad.style.display = 'block');
                 errorMessage.innerHTML = '';
             } else {
                 errorMessage.innerHTML = 'Incorrect password. Please try again.';
@@ -314,48 +329,52 @@
             });
             startButtonMovement();
 
-            const notepad = document.getElementById('notepad');
-            const notepadHeader = document.getElementById('notepadHeader');
-            const notepadContent = document.getElementById('notepadContent');
+            const notepads = [
+                { notepad: document.getElementById('notepad1'), header: document.getElementById('notepadHeader1'), content: document.getElementById('notepadContent1') },
+                { notepad: document.getElementById('notepad2'), header: document.getElementById('notepadHeader2'), content: document.getElementById('notepadContent2') },
+                { notepad: document.getElementById('notepad3'), header: document.getElementById('notepadHeader3'), content: document.getElementById('notepadContent3') },
+            ];
 
-            let isDragging = false;
-            let offsetX, offsetY;
+            notepads.forEach(({ notepad, header, content }, index) => {
+                let isDragging = false;
+                let offsetX, offsetY;
 
-            notepadHeader.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                offsetX = e.clientX - notepad.offsetLeft;
-                offsetY = e.clientY - notepad.offsetTop;
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                header.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    offsetX = e.clientX - notepad.offsetLeft;
+                    offsetY = e.clientY - notepad.offsetTop;
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+
+                function onMouseMove(e) {
+                    if (!isDragging) return;
+                    notepad.style.left = `${e.clientX - offsetX}px`;
+                    notepad.style.top = `${e.clientY - offsetY}px`;
+                }
+
+                function onMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+
+                // Close notepad
+                window[`closeNotepad${index+1}`] = function() {
+                    notepad.style.display = 'none';
+                };
+
+                // Auto-save functionality
+                content.addEventListener('input', () => {
+                    localStorage.setItem(`notepadContent${index+1}`, content.value);
+                });
+
+                // Load saved content
+                const savedContent = localStorage.getItem(`notepadContent${index+1}`);
+                if (savedContent) {
+                    content.value = savedContent;
+                }
             });
-
-            function onMouseMove(e) {
-                if (!isDragging) return;
-                notepad.style.left = `${e.clientX - offsetX}px`;
-                notepad.style.top = `${e.clientY - offsetY}px`;
-            }
-
-            function onMouseUp() {
-                isDragging = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-
-            // Close notepad
-            window.closeNotepad = function() {
-                notepad.style.display = 'none';
-            };
-
-            // Auto-save functionality
-            notepadContent.addEventListener('input', () => {
-                localStorage.setItem('notepadContent', notepadContent.value);
-            });
-
-            // Load saved content
-            const savedContent = localStorage.getItem('notepadContent');
-            if (savedContent) {
-                notepadContent.value = savedContent;
-            }
         });
     </script>
 </body>
