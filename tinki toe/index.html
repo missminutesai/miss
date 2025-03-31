@@ -6,7 +6,6 @@
     <title>Miss Minutes</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="styletip.css">
- 
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,7 +18,7 @@
             margin: 0;
         }
 
-        .password-container, .content-container {
+        .password-container, .content-container, .notepad-password-container {
             display: none;
             flex-direction: column;
             align-items: center;
@@ -31,7 +30,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .password-container {
+        .password-container, .notepad-password-container {
             display: flex;
             background-color: #333333; /* Shadow Black */
             color: #FFA500; /* Miss Minutes Orange */
@@ -114,6 +113,37 @@
             background-color: #333333; /* Shadow Black */
             color: #FFA500; /* Miss Minutes Orange */
         }
+
+        .clock-container, .extra-button {
+            cursor: pointer;
+            text-align: center;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            position: absolute;
+        }
+
+        .tip-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .close-btn {
+            background-color: #ff0000;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -124,8 +154,92 @@
     </div>
 
     <div class="content-container" id="contentContainer">
-        <h1>Protected Content</h1>
-        <p>This content is password protected.</p>
+        <div class="notepad-password-container" id="notepadPasswordContainer">
+            <input type="password" id="notepadPasswordInput" class="password-input" placeholder="Enter password for notepad">
+            <button class="password-button" onclick="validateNotepadPassword()">Submit</button>
+            <div id="notepadErrorMessage" class="error-message"></div>
+        </div>
+
+        <div class="container">
+            <header>
+                <h1>Miss Minutes Game</h1>
+            </header>
+            <main>
+                <div id="scoreboard">
+                    <p>Score: <span id="player-score">0</span> - <span id="ai-score">0</span></p>
+                </div>
+                <div class="clock-container" id="clockContainer1">
+                    <div class="clock-content">
+                        <p>Buy</p>
+                        <p>Now</p>
+                    </div>
+                </div>
+                <div class="clock-container extra-button" id="clockContainer2">
+                    <div class="clock-content">
+                        <p>Buy</p>
+                        <p>Now</p>
+                    </div>
+                </div>
+                <div class="clock-container extra-button" id="clockContainer3">
+                    <div class="clock-content">
+                        <p>Buy</p>
+                        <p>Now</p>
+                    </div>
+                </div>
+                <div class="clock-container extra-button" id="clockContainer4">
+                    <div class="clock-content">
+                        <p>Buy</p>
+                        <p>Now</p>
+                    </div>
+                </div>
+    
+                <div class="tip-modal" id="tipModal">
+                    <div class="tip-content">
+                        <button class="close-btn" onclick="toggleTip()">×</button>
+                        <h2>Miss Minutes Contract Address: GGF2SUiwWnBqzuAZjx4pZcqBNFstNgRgQM8PCXM3pump</h2>
+                    </div>
+                </div>
+    
+                <div id="game-info">
+                    <p id="turn-info">Press 'Start Game' to play!</p>
+                </div>
+                <div id="level-options">
+                    <button id="level-1">Easy</button>
+                    <button id="level-2">Normal</button>
+                    <button id="level-3">Play with Miss Minutes</button>
+                    <button id="play-with-friend">Play with a friend</button>
+                </div>
+                <button id="start-game" style="display:none;">Start Game</button>
+                <div class="board" id="board">
+                    <div class="cell" data-index="0"></div>
+                    <div class="cell" data-index="1"></div>
+                    <div class="cell" data-index="2"></div>
+                    <div class="cell" data-index="3"></div>
+                    <div class="cell" data-index="4"></div>
+                    <div class="cell" data-index="5"></div>
+                    <div class="cell" data-index="6"></div>
+                    <div class="cell" data-index="7"></div>
+                    <div class="cell" data-index="8"></div>
+                </div>
+                <button id="play-again" style="display:none;">Play Again?</button>
+                <div id="message"></div>
+                <div id="result-display" class="hidden"></div>
+            </main>
+            <footer>
+                <p>&copy; 2025</p>
+            </footer>
+        </div>
+    
+        <!-- Result Log -->
+        <div id="result-log"></div>
+    
+        <!-- Audio Files -->
+        <audio id="welcome-audio" src="audio/welcome.wav"></audio>
+        <audio id="history-lesson-audio" src="audio/history_lesson.mp3"></audio>
+        <audio id="you-win-audio" src="audio/you_win.wav"></audio>
+        <audio id="i-win-audio" src="audio/i_win.wav"></audio>
+        <audio id="draw-audio" src="audio/draw.wav"></audio>
+    
         <div id="notepad" class="notepad">
             <div class="notepad-header" id="notepadHeader">
                 <span class="notepad-title">Notepad</span>
@@ -135,8 +249,11 @@
         </div>
     </div>
 
+    <script src="script.js"></script>
+
     <script>
-        const correctPassword = "yourpassword"; // Set your password here
+        const correctPassword = "love"; // Set your password here
+        const notepadPassword = "mylove"; // Set your notepad password here
 
         document.addEventListener('DOMContentLoaded', (event) => {
             document.getElementById('passwordContainer').style.display = 'flex';
@@ -157,346 +274,21 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', (event) => {
+        function validateNotepadPassword() {
+            const inputPassword = document.getElementById('notepadPasswordInput').value;
+            const errorMessage = document.getElementById('notepadErrorMessage');
+            const notepadPasswordContainer = document.getElementById('notepadPasswordContainer');
             const notepad = document.getElementById('notepad');
-            const notepadHeader = document.getElementById('notepadHeader');
-            const notepadContent = document.getElementById('notepadContent');
 
-            let isDragging = false;
-            let offsetX, offsetY;
-
-            notepadHeader.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                offsetX = e.clientX - notepad.offsetLeft;
-                offsetY = e.clientY - notepad.offsetTop;
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            });
-
-            function onMouseMove(e) {
-                if (!isDragging) return;
-                notepad.style.left = `${e.clientX - offsetX}px`;
-                notepad.style.top = `${e.clientY - offsetY}px`;
+            if (inputPassword === notepadPassword) {
+                notepadPasswordContainer.style.display = 'none';
+                notepad.style.display = 'block';
+                errorMessage.innerHTML = '';
+            } else {
+                errorMessage.innerHTML = 'Incorrect password. Please try again.';
             }
-
-            function onMouseUp() {
-                isDragging = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-
-            // Close notepad
-            window.closeNotepad = function() {
-                notepad.style.display = 'none';
-            };
-
-            // Auto-save functionality
-            notepadContent.addEventListener('input', () => {
-                localStorage.setItem('notepadContent', notepadContent.value);
-            });
-
-            // Load saved content
-            const savedContent = localStorage.getItem('notepadContent');
-            if (savedContent) {
-                notepadContent.value = savedContent;
-            }
-        });
-    </script>
-
-    <style>
-        .clock-container, .extra-button {
-            cursor: pointer;
-            text-align: center;
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 20px;
-            border-radius: 5px;
-            position: absolute;
-        }
-        .tip-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #ffffff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            border-radius: 5px;
-        }
-        .close-btn {
-            background-color: #ff0000;
-            color: #ffffff;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-
-        .password-container, .content-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .password-container {
-            display: flex;
-        }
-
-        .password-input {
-            padding: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .password-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .password-button:hover {
-            background-color: #3367d6;
-        }
-
-        .error-message {
-            color: red;
-            margin-top: 10px;
-        }
-
-         body {
-            font-family: Arial, sans-serif;
-        }
-
-        .notepad {
-            position: absolute;
-            top: 50px;
-            left: 50px;
-            width: 300px;
-            background-color: #f4f4f4;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-
-        .notepad-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: #4285f4;
-            color: white;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            cursor: move;
-        }
-
-        .notepad-title {
-            font-size: 16px;
-        }
-
-        .notepad-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .notepad-content {
-            width: 100%;
-            height: 200px;
-            padding: 10px;
-            border: none;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
-            resize: none;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-       <div class="password-container" id="passwordContainer">
-        <input type="password" id="passwordInput" class="password-input" placeholder="Enter password">
-        <button class="password-button" onclick="validatePassword()">Submit</button>
-        <div id="errorMessage" class="error-message"></div>
-    </div>
-
-    <div class="content-container" id="contentContainer">
-        <h1>Protected Content</h1>
-        <p>This content is password protected.</p>
-    </div>
-
-    <div id="notepad" class="notepad">
-        <div class="notepad-header" id="notepadHeader">
-            <span class="notepad-title">Notepad</span>
-            <button class="notepad-close" onclick="closeNotepad()">X</button>
-        </div>
-        <textarea id="notepadContent" class="notepad-content" placeholder="Write your notes here..."></textarea>
-    </div>
-    <div class="container">
-        <header>
-            <h1>Miss Minutes Game</h1>
-        </header>
-        <main>
-            <div id="scoreboard">
-                <p>Score: <span id="player-score">0</span> - <span id="ai-score">0</span></p>
-            </div>
-            <div class="clock-container" id="clockContainer1">
-                <div class="clock-content">
-                    <p>Buy</p>
-                    <p>Now</p>
-                </div>
-            </div>
-            <div class="clock-container extra-button" id="clockContainer2">
-                <div class="clock-content">
-                    <p>Buy</p>
-                    <p>Now</p>
-                </div>
-            </div>
-            <div class="clock-container extra-button" id="clockContainer3">
-                <div class="clock-content">
-                    <p>Buy</p>
-                    <p>Now</p>
-                </div>
-            </div>
-            <div class="clock-container extra-button" id="clockContainer4">
-                <div class="clock-content">
-                    <p>Buy</p>
-                    <p>Now</p>
-                </div>
-            </div>
-
-            <div class="tip-modal" id="tipModal">
-                <div class="tip-content">
-                    <button class="close-btn" onclick="toggleTip()">×</button>
-                    <h2>Miss Minutes Contract Address: GGF2SUiwWnBqzuAZjx4pZcqBNFstNgRgQM8PCXM3pump</h2>
-                </div>
-            </div>
-
-            <div id="game-info">
-                <p id="turn-info">Press 'Start Game' to play!</p>
-            </div>
-            <div id="level-options">
-                <button id="level-1">Easy</button>
-                <button id="level-2">Normal</button>
-                <button id="level-3">Play with Miss Minutes</button>
-                <button id="play-with-friend">Play with a friend</button>
-            </div>
-            <button id="start-game" style="display:none;">Start Game</button>
-            <div class="board" id="board">
-                <div class="cell" data-index="0"></div>
-                <div class="cell" data-index="1"></div>
-                <div class="cell" data-index="2"></div>
-                <div class="cell" data-index="3"></div>
-                <div class="cell" data-index="4"></div>
-                <div class="cell" data-index="5"></div>
-                <div class="cell" data-index="6"></div>
-                <div class="cell" data-index="7"></div>
-                <div class="cell" data-index="8"></div>
-            </div>
-            <button id="play-again" style="display:none;">Play Again?</button>
-            <div id="message"></div>
-            <div id="result-display" class="hidden"></div>
-        </main>
-        <footer>
-            <p>&copy; 2025</p>
-        </footer>
-    </div>
-
-    <!-- Result Log -->
-    <div id="result-log"></div>
-
-    <!-- Audio Files -->
-    <audio id="welcome-audio" src="audio/welcome.wav"></audio>
-    <audio id="history-lesson-audio" src="audio/history_lesson.mp3"></audio>
-    <audio id="you-win-audio" src="audio/you_win.wav"></audio>
-    <audio id="i-win-audio" src="audio/i_win.wav"></audio>
-    <audio id="draw-audio" src="audio/draw.wav"></audio>
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const notepad = document.getElementById('notepad');
-            const notepadHeader = document.getElementById('notepadHeader');
-            const notepadContent = document.getElementById('notepadContent');
-
-            let isDragging = false;
-            let offsetX, offsetY;
-
-            notepadHeader.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                offsetX = e.clientX - notepad.offsetLeft;
-                offsetY = e.clientY - notepad.offsetTop;
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            });
-
-            function onMouseMove(e) {
-                if (!isDragging) return;
-                notepad.style.left = `${e.clientX - offsetX}px`;
-                notepad.style.top = `${e.clientY - offsetY}px`;
-            }
-
-            function onMouseUp() {
-                isDragging = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-
-            // Close notepad
-            window.closeNotepad = function() {
-                notepad.style.display = 'none';
-            };
-
-            // Auto-save functionality
-            notepadContent.addEventListener('input', () => {
-                localStorage.setItem('notepadContent', notepadContent.value);
-            });
-
-            // Load saved content
-            const savedContent = localStorage.getItem('notepadContent');
-            if (savedContent) {
-                notepadContent.value = savedContent;
-            }
-        });
-    </script>
-    <script>
-        // Optional: Load the notepad in a specific position
-        window.onload = function() {
-            const notepad = document.getElementById('notepad');
-            const savedPosition = localStorage.getItem('notepadPosition');
-            if (savedPosition) {
-                const { left, top } = JSON.parse(savedPosition);
-                notepad.style.left = `${left}px`;
-                notepad.style.top = `${top}px`;
-            }
-        };
-</script>
-    <script src="script.js"></script>
-
-    <script>
         function toggleTip() {
             var modal = document.getElementById('tipModal');
             modal.style.display = (modal.style.display === "block") ? "none" : "block";
@@ -526,30 +318,50 @@
                 container.addEventListener('click', redirectToPage);
             });
             startButtonMovement();
-        });
-    </script>
 
-   <script>
-        const correctPassword = "love"; // Set your password here
+            const notepad = document.getElementById('notepad');
+            const notepadHeader = document.getElementById('notepadHeader');
+            const notepadContent = document.getElementById('notepadContent');
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            document.getElementById('passwordContainer').style.display = 'flex';
-        });
+            let isDragging = false;
+            let offsetX, offsetY;
 
-        function validatePassword() {
-            const inputPassword = document.getElementById('passwordInput').value;
-            const errorMessage = document.getElementById('errorMessage');
-            const passwordContainer = document.getElementById('passwordContainer');
-            const contentContainer = document.getElementById('contentContainer');
+            notepadHeader.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - notepad.offsetLeft;
+                offsetY = e.clientY - notepad.offsetTop;
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
 
-            if (inputPassword === correctPassword) {
-                passwordContainer.style.display = 'none';
-                contentContainer.style.display = 'flex';
-                errorMessage.innerHTML = '';
-            } else {
-                errorMessage.innerHTML = 'Incorrect password. Please try again.';
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                notepad.style.left = `${e.clientX - offsetX}px`;
+                notepad.style.top = `${e.clientY - offsetY}px`;
             }
-        }
+
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            // Close notepad
+            window.closeNotepad = function() {
+                notepad.style.display = 'none';
+            };
+
+            // Auto-save functionality
+            notepadContent.addEventListener('input', () => {
+                localStorage.setItem('notepadContent', notepadContent.value);
+            });
+
+            // Load saved content
+            const savedContent = localStorage.getItem('notepadContent');
+            if (savedContent) {
+                notepadContent.value = savedContent;
+            }
+        });
     </script>
 </body>
 </html>
