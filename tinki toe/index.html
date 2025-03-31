@@ -140,6 +140,26 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
+        .file-upload-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        .file-upload-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FF8C00; /* Dark Orange */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .file-upload-button:hover {
+            background-color: #FF4500; /* Vibrant Orange */
+        }
     </style>
 </head>
 <body>
@@ -257,6 +277,13 @@
             </div>
             <textarea id="notepadContent3" class="notepad-content" placeholder="Write your notes here..."></textarea>
         </div>
+
+        <div class="file-upload-container">
+            <form id="fileUploadForm" action="your-form-endpoint" method="post" enctype="multipart/form-data">
+                <input type="file" id="fileUploadInput" name="file" style="display:none;" onchange="uploadFile()">
+                <button type="button" class="file-upload-button" onclick="document.getElementById('fileUploadInput').click();">Upload File</button>
+            </form>
+        </div>
     </div>
 
     <script src="script.js"></script>
@@ -299,6 +326,10 @@
             }
         }
 
+        function closeNotepad(notepadId) {
+            document.getElementById(notepadId).style.display = 'none';
+        }
+
         function toggleTip() {
             var modal = document.getElementById('tipModal');
             modal.style.display = (modal.style.display === "block") ? "none" : "block";
@@ -320,6 +351,10 @@
             buttons.forEach(button => {
                 setInterval(() => moveButton(button), 2000);
             });
+        }
+
+        function uploadFile() {
+            document.getElementById('fileUploadForm').submit();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -358,11 +393,6 @@
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
                 }
-
-                // Close notepad
-                window[`closeNotepad${index+1}`] = function() {
-                    notepad.style.display = 'none';
-                };
 
                 // Auto-save functionality
                 content.addEventListener('input', () => {
