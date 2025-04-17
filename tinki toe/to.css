@@ -1,0 +1,152 @@
+/* General Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a; /* Dark background */
+    color: #e6e6e6; /* Light text for readability */
+  }
+  
+  /* Header */
+  header {
+    background-color: #FFA500; /* Miss Minutes Orange */
+    color: #000;
+    text-align: center;
+    padding: 1rem 0;
+  }
+  
+  header h1 {
+    margin: 0;
+  }
+  
+  #clock {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Main Container */
+  .main-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  
+  /* Sections */
+  #todo-section,
+  #timer-section,
+  #notepad-section {
+    background: #333333; /* Shadow Black */
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  #todo-section h2,
+  #timer-section h2,
+  #notepad-section h2 {
+    color: #FFA500; /* Miss Minutes Orange */
+  }
+  
+  button {
+    background-color: #FF8C00; /* Dark Orange */
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #FFA500; /* Miss Minutes Orange */
+  }
+  
+  /* Input Fields */
+  input[type="text"],
+  input[type="time"],
+  input[type="number"] {
+    width: 90%; /* Full width */
+    height: 2rem; /* Larger height */
+    padding: 0.5rem;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    border: 2px solid #444;
+    border-radius: 10px;
+    background-color: #222; /* Darker background for inputs */
+    color: #fff;
+  }
+  
+  input[type="text"]::placeholder,
+  input[type="time"]::placeholder,
+  input[type="number"]::placeholder {
+    font-size: 1rem;
+    color: #aaa; /* Placeholder text color */
+  }
+  
+  /* Task List */
+  #todo-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+  
+  #todo-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: #444;
+    border-radius: 5px;
+  }
+  
+  #todo-list li.overdue {
+    background: #FF4500; /* Vibrant Orange for overdue tasks */
+    color: #fff;
+  }
+  
+  .task-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .task-controls button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Timer */
+  #timer-display {
+    font-size: 2rem;
+    text-align: center;
+    margin: 1rem 0;
+  }
+  
+  /* Notepads */
+  #notepad-container {
+    margin-top: 1rem;
+    position: relative;
+  }
+  
+  .notepad {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 200px;
+    background: #FF4500; /* Vibrant Orange */
+    color: #fff;
+    border: 2px solid #000;
+    border-radius: 10px;
+    padding: 1rem;
+    overflow: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    resize: both;
+    cursor: move;
+  }

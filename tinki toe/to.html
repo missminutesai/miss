@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miss Minutes To-Do App</title>
+  <link rel="stylesheet" href="to.css">
+</head>
+<body>
+  <header>
+    <h1>Miss Minutes To-Do App</h1>
+    <div id="clock"></div>
+  </header>
+  <main>
+    <div class="main-container">
+      <!-- Task List -->
+      <section id="todo-section">
+        <h2>To-Do List</h2>
+        <form id="todo-form">
+          <input type="text" id="task-input" placeholder="Enter a new task" required>
+          <input type="time" id="task-time" required>
+          <button type="submit">Add Task</button>
+        </form>
+        <ul id="todo-list"></ul>
+      </section>
+
+      <!-- Timer -->
+      <section id="timer-section">
+        <h2>Countdown Timer</h2>
+        <div id="timer-display">00:00:00</div>
+        <form id="timer-form">
+          <input type="number" id="timer-minutes" placeholder="Minutes" min="0" required>
+          <button type="button" id="start-timer">Start Timer</button>
+          <button type="button" id="reset-timer">Reset Timer</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- Notepads -->
+    <section id="notepad-section">
+      <h2>Notepads</h2>
+      <button id="add-notepad-button">Add New Notepad</button>
+      <div id="notepad-container"></div>
+    </section>
+  </main>
+  <audio id="alarm-sound" src="alarm.mp3"></audio>
+  <script src="to.js"></script>
+</body>
+</html>
