@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Miss Minutes Developer Diary</title>
+  <style>
+    :root {
+      --orange: #ff9500;
+      --yellow: #ffd700;
+      --white: #ffffff;
+      --black: #1a1a1a;
+    }
+    body {
+      background: var(--orange);
+      color: var(--black);
+      font-family: 'Quicksand', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      color: var(--yellow);
+      margin-top: 2rem;
+      font-family: 'Bangers', cursive;
+      font-size: 3rem;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 0 var(--orange), 4px 4px 0 var(--black);
+    }
+    table {
+      margin: 2rem auto;
+      width: 80%;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--black);
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+    }
+    th, td {
+      text-align: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--yellow);
+    }
+    th {
+      background: var(--orange);
+      color: var(--white);
+      font-size: 1.2rem;
+    }
+    a {
+      color: var(--orange);
+      text-decoration: underline;
+      font-weight: bold;
+    }
+    .zip-btn {
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 1px 4px var(--orange);
+      transition: background 0.2s, color 0.2s;
+    }
+    .zip-btn:hover {
+      background: var(--orange);
+      color: var(--white);
+    }
+    #password-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(26, 26, 26, 0.97);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #password-modal {
+      background: var(--orange);
+      padding: 2rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px var(--black);
+      text-align: center;
+      color: var(--black);
+      font-family: 'Quicksand', Arial, sans-serif;
+    }
+    #password-modal h2 {
+      margin-bottom: 1rem;
+      color: var(--yellow);
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+    }
+    #password-modal input {
+      padding: 0.5rem 1rem;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: 2px solid var(--yellow);
+      margin-bottom: 1rem;
+      outline: none;
+      width: 80%;
+    }
+    #password-modal button {
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.5rem;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 1px 4px var(--orange);
+      transition: background 0.2s, color 0.2s;
+    }
+    #password-modal button:hover {
+      background: var(--white);
+    }
+    #password-modal .error {
+      color: var(--black);
+      background: var(--yellow);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      padding: 0.4rem;
+      font-weight: bold;
+    }
+    @media (max-width: 700px) {
+      table { width: 100%; font-size: 0.95em;}
+      h1 { font-size: 2rem; }
+      th, td { padding: 0.5rem; }
+      #password-modal { padding: 1rem 0.5rem; }
+      #password-modal h2 { font-size: 1.2rem; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="password-overlay">
+    <div id="password-modal">
+      <h2>Miss Minutes Diary Access</h2>
+      <div id="password-error" class="error" style="display:none"></div>
+      <input type="password" id="diary-password" placeholder="Enter your diary password" autofocus />
+      <br>
+      <button onclick="checkPassword()">Enter</button>
+    </div>
+  </div>
+  <h1>Miss Minutes Developer Diary</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Project Name</th>
+        <th>Link</th>
+        <th>Zip</th>
+      </tr>
+    </thead>
+    <tbody id="project-table">
+      <tr>
+        <td>Sample Project 1</td>
+        <td><a href="https://github.com/Sahimaki/sample-project-1" target="_blank">View</a></td>
+        <td><button class="zip-btn" onclick="downloadZip('sample-project-1.zip')">Download Zip</button></td>
+      </tr>
+      <tr>
+        <td>Sample Project 2</td>
+        <td><a href="https://github.com/Sahimaki/sample-project-2" target="_blank">View</a></td>
+        <td><button class="zip-btn" onclick="downloadZip('sample-project-2.zip')">Download Zip</button></td>
+      </tr>
+      <tr>
+        <td>Sample Project 3</td>
+        <td><a href="https://github.com/Sahimaki/sample-project-3" target="_blank">View</a></td>
+        <td><button class="zip-btn" onclick="downloadZip('sample-project-3.zip')">Download Zip</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <script>
+    // Change this to your actual password!
+    const CORRECT_PASSWORD = 'MissMinutes123';
+
+    function checkPassword() {
+      const input = document.getElementById('diary-password');
+      const errorDiv = document.getElementById('password-error');
+      if (input.value === CORRECT_PASSWORD) {
+        document.getElementById('password-overlay').style.display = 'none';
+      } else {
+        errorDiv.style.display = "block";
+        errorDiv.innerText = "Incorrect password!";
+        input.value = "";
+        input.focus();
+      }
+    }
+    document.getElementById('diary-password').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    function downloadZip(zipName) {
+      // In real usage, provide the file path on your server
+      alert('Simulated download for: ' + zipName);
+      // window.location.href = '/path/to/zips/' + zipName;
+    }
+  </script>
+</body>
+</html>
