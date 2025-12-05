@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Miss Minutes — Tic Tac Toe (TVA Betting)</title>
+
+  <style>
+    :root{
+      --bg: #000000;            /* black */
+      --panel: #0b0b0b;
+      --accent: #FF8C00;        /* orange */
+      --accent-2: #FFA500;
+      --muted: #97A0B3;
+      --text: #e6e6e6;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --glass: rgba(255,255,255,0.03);
+      --card: #0f1112;
+    }
+
+    /* Base layout */
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#020203 0%, #060606 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+    .page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+
+    /* App container */
+    .app {
+      width:100%;
+      max-width:1100px;
+      border-radius:14px;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:22px;
+      padding:22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 14px 50px rgba(0,0,0,0.7);
+    }
+
+    /* Left controls */
+    .controls { display:flex;flex-direction:column; gap:14px; }
+    .brand { display:flex;gap:12px;align-items:center }
+    .logo { width:64px;height:64px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900;color:#08111a;font-size:20px;box-shadow:0 8px 30px rgba(255,140,0,0.12) }
+    h1{margin:0;font-size:18px;color:var(--accent-2)}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .card { background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.02) }
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="number"], input[type="range"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);outline:none}
+    .row{display:flex;gap:8px;align-items:center}
+    .muted{color:var(--muted)}
+    .btn{background:var(--accent);color:#08111a;border:none;padding:10px 12px;border-radius:10px;font-weight:800;cursor:pointer}
+    .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.03)}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.04);color:var(--muted)}
+    .modes{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+
+    /* Board area */
+    .board-area { display:flex;flex-direction:column;align-items:center;gap:16px; }
+    .panel { width:100%;max-width:720px;border-radius:12px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02) }
+
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+    .status { font-weight:800;color:var(--muted) }
+    .mode-chip { font-weight:900;color:var(--accent-2) }
+
+    /* Board */
+    .board {
+      width:100%;
+      max-width:480px;
+      aspect-ratio:1/1;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      padding:12px;
+    }
+    .cell {
+      background:#000;border-radius:14px;display:flex;align-items:center;justify-content:center;
+      font-size:clamp(30px, 6vw, 56px); color:var(--accent-2);
+      cursor:pointer;user-select:none;border:1px solid rgba(255,255,255,0.03);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cell:active{transform:translateY(2px) scale(.995)}
+    .cell.disabled{pointer-events:none;opacity:.7}
+    .cell.win{ box-shadow:0 18px 40px rgba(255,140,0,0.08); background: linear-gradient(90deg, rgba(255,140,0,0.12), rgba(255,140,0,0.04)); }
+    .cell.pending{outline:3px dashed rgba(255,140,0,0.18); transform:scale(.985) }
+
+    .cell.x{ color:var(--accent); font-weight:900 }
+    .cell.o{ color:#fff; font-weight:900 }
+
+    @keyframes prune { 0%{opacity:1;transform:scale(1)} 60%{opacity:.6;transform:scale(.82)} 100%{opacity:0;transform:scale(.18)} }
+    .prune{animation:prune .72s cubic-bezier(.2,.9,.3,1) forwards}
+
+    /* Foster / footer */
+    .foster { margin-top:6px;text-align:center }
+    .foster .title{font-weight:900;color:var(--accent-2);font-size:15px}
+    .foster .desc{color:var(--muted);font-size:13px;max-width:860px;margin:6px auto 0}
+
+    footer{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .app{grid-template-columns:1fr;padding:16px}
+      .controls{order:2}
+      .board-area{order:1}
+      .board{max-width:360px;gap:10px}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="app" role="application" aria-labelledby="appTitle">
+
+      <!-- LEFT: Controls -->
+      <div class="controls">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">MM</div>
+          <div>
+            <h1 id="appTitle">Miss Minutes</h1>
+            <p class="lead">Quick, fair, addictive tic-tac-toe — bet TVA, win TVA.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <label for="betAmount">Bet amount ($TVA)</label>
+          <input id="betAmount" type="number" min="0.01" step="0.01" placeholder="e.g. 10" />
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <label for="multiplier">Multiplier: <span id="multDisplay">1.0x</span></label>
+            <div id="potentialPayout" style="font-weight:900;color:var(--accent-2)">$0.00 TVA</div>
+          </div>
+          <input id="multiplier" type="range" min="1" max="40" step="0.1" value="1" style="margin-top:8px" />
+          <div style="margin-top:10px;color:var(--muted);font-size:13px">Default multipliers per mode; you may adjust up to 40x.</div>
+        </div>
+
+        <div class="card">
+          <label>Game mode</label>
+          <div class="modes" role="toolbar">
+            <button id="easy" class="btn secondary" data-mode="easy">Easy</button>
+            <button id="normal" class="btn secondary" data-mode="normal">Normal</button>
+            <button id="hard" class="btn" data-mode="hard">Miss Minutes (Hard)</button>
+            <button id="local" class="btn secondary" data-mode="local">Play with friend</button>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+            <div class="muted" style="margin-right:8px">Who starts?</div>
+            <button id="start-you" class="btn">You</button>
+            <button id="start-ai" class="btn secondary">Miss Minutes</button>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button id="start" class="btn" style="flex:1">Start Game</button>
+            <button id="playAgain" class="btn secondary hidden" style="flex:1">Play Again</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="muted">Net TVA</div>
+            <div style="font-weight:900;color:var(--accent-2)"><span id="netTVA">0.00</span> TVA</div>
+          </div>
+          <div style="margin-top:8px;color:var(--muted);font-size:13px">Simulation only — no real transfers. Integrate backend to make real.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Board + foster -->
+      <div class="board-area">
+        <div class="panel">
+          <div class="topbar">
+            <div>
+              <div class="muted">Mode</div>
+              <div id="modeLabel" class="mode-chip">—</div>
+            </div>
+            <div>
+              <div class="muted">Turn</div>
+              <div id="turnLabel" class="status">—</div>
+            </div>
+          </div>
+
+          <div id="board" class="board" role="grid" aria-label="Tic Tac Toe board">
+            <div class="cell" data-index="0" tabindex="0" role="button" aria-label="cell 0"></div>
+            <div class="cell" data-index="1" tabindex="0" role="button" aria-label="cell 1"></div>
+            <div class="cell" data-index="2" tabindex="0" role="button" aria-label="cell 2"></div>
+            <div class="cell" data-index="3" tabindex="0" role="button" aria-label="cell 3"></div>
+            <div class="cell" data-index="4" tabindex="0" role="button" aria-label="cell 4"></div>
+            <div class="cell" data-index="5" tabindex="0" role="button" aria-label="cell 5"></div>
+            <div class="cell" data-index="6" tabindex="0" role="button" aria-label="cell 6"></div>
+            <div class="cell" data-index="7" tabindex="0" role="button" aria-label="cell 7"></div>
+            <div class="cell" data-index="8" tabindex="0" role="button" aria-label="cell 8"></div>
+          </div>
+
+          <div id="message" style="margin-top:12px;color:var(--muted);min-height:18px"></div>
+
+          <div class="foster" aria-hidden="false">
+            <div class="title">Miss Minutes — TVA Betting Match</div>
+            <div class="desc">Simple rules: set your bet, choose a mode, tap cells to play. On mobile you confirm with a double-tap to avoid mistakes. Win TVA based on your multiplier. Good for quick rounds — fast, fair, addictive.</div>
+            <div style="margin-top:8px;color:var(--muted);font-size:12px">Miss Minutes AI — designed for play by @copilot</div>
+          </div>
+        </div>
+
+        <footer>&copy; 2025 Miss Minutes — addictive by design</footer>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Configuration
+  const MAX_MULT = 40;
+  const DEFAULTS = { easy: 1, normal: 1.5, hard: 2 };
+  // State
+  let mode = null; // 'easy','normal','hard','local'
+  let board = Array(9).fill(null);
+  let current = 'X';
+  let starting = 'X';
+  let running = false;
+  let gameOver = false;
+  let netTVA = 0;
+
+  // mobile double-tap
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  let pending = null;
+  let pendingTimer = null;
+
+  // Helpers
+  const $ = id => document.getElementById(id);
+  const qs = sel => Array.from(document.querySelectorAll(sel));
+  function updateUI(){
+    $('netTVA').textContent = netTVA.toFixed(2);
+    $('modeLabel').textContent = mode || '—';
+    $('turnLabel').textContent = running ? current : '—';
+  }
+  function resetBoardUI(){
+    pending = null; clearTimeout(pendingTimer);
+    board = Array(9).fill(null);
+    qs('.cell').forEach(c => {
+      c.textContent = '';
+      c.classList.remove('disabled','win','x','o','pending','prune');
+      c.removeAttribute('aria-pressed');
+    });
+    gameOver = false;
+    running = false;
+    $('message').textContent = 'Choose mode, set bet and multiplier, then Start';
+    updateUI();
+  }
+
+  function counts(){
+    return board.reduce((a,v)=>{
+      if(v === 'X') a.X++; if(v === 'O') a.O++;
+      return a;
+    }, {X:0,O:0});
+  }
+
+  function validOrder(symbol){
+    const c = counts();
+    if(symbol === 'X') return c.X === c.O;
+    if(symbol === 'O') return c.X === c.O + 1;
+    return false;
+  }
+
+  function checkWin(b){
+    const W = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for(const w of W){
+      const [a,b1,c] = w;
+      if(b[a] && b[a] === b[b1] && b[a] === b[c]) return {winner:b[a], line:w};
+    }
+    if(b.every(x=>x)) return {winner:'draw'};
+    return null;
+  }
+
+  // AI: easy random, normal heuristic, hard (minimax)
+  function aiRandom(){
+    const empties = board.map((v,i)=>v?null:i).filter(x=>x!==null);
+    if(!empties.length) return;
+    const idx = empties[Math.floor(Math.random()*empties.length)];
+    playMove(idx, 'O');
+  }
+
+  function aiNormal(){
+    const empties = board.map((v,i)=>v?null:i).filter(x=>x!==null);
+    const tryMove = (sym, i) => {
+      const tmp = board.slice(); tmp[i]=sym; return checkWin(tmp);
+    };
+    // win
+    for(const i of empties){
+      const r = tryMove('O', i);
+      if(r && r.winner==='O'){ playMove(i,'O'); return; }
+    }
+    // block
+    for(const i of empties){
+      const r = tryMove('X', i);
+      if(r && r.winner==='X'){ playMove(i,'O'); return; }
+    }
+    // center
+    if(board[4] === null){ playMove(4,'O'); return; }
+    // corner
+    const corners = [0,2,6,8].filter(i=>board[i]===null);
+    if(corners.length){ playMove(corners[Math.floor(Math.random()*corners.length)], 'O'); return; }
+    // side
+    const sides = [1,3,5,7].filter(i=>board[i]===null);
+    if(sides.length){ playMove(sides[Math.floor(Math.random()*sides.length)], 'O'); return; }
+    aiRandom();
+  }
+
+  function minimax(tmpBoard, depth, isMax){
+    const res = checkWin(tmpBoard);
+    if(res){
+      if(res.winner === 'O') return 10 - depth;
+      if(res.winner === 'X') return depth - 10;
+      return 0;
+    }
+    if(isMax){
+      let best = -Infinity;
+      for(let i=0;i<9;i++){
+        if(!tmpBoard[i]){
+          tmpBoard[i] = 'O';
+          const s = minimax(tmpBoard, depth+1, false);
+          tmpBoard[i] = null;
+          best = Math.max(best, s);
+        }
+      }
+      return best;
+    } else {
+      let best = Infinity;
+      for(let i=0;i<9;i++){
+        if(!tmpBoard[i]){
+          tmpBoard[i] = 'X';
+          const s = minimax(tmpBoard, depth+1, true);
+          tmpBoard[i] = null;
+          best = Math.min(best, s);
+        }
+      }
+      return best;
+    }
+  }
+
+  function aiHard(){
+    let best = -Infinity, move = null;
+    for(let i=0;i<9;i++){
+      if(!board[i]){
+        board[i] = 'O';
+        const score = minimax(board,0,false);
+        board[i] = null;
+        if(score > best){ best = score; move = i; }
+      }
+    }
+    if(move !== null) playMove(move,'O');
+    else aiRandom();
+  }
+
+  // prune losing marks with animation then clear them
+  function pruneLoser(winner){
+    const loser = winner === 'X' ? 'O' : 'X';
+    const toPrune = qs('.cell').filter(c => c.textContent === loser);
+    if(!toPrune.length) return;
+    toPrune.forEach((c,i) => setTimeout(()=> c.classList.add('prune'), i*80));
+    const delay = 700 + toPrune.length*80 + 40;
+    setTimeout(()=>{
+      toPrune.forEach(c => {
+        const idx = parseInt(c.dataset.index,10);
+        if(board[idx] === loser) board[idx] = null;
+        c.textContent = ''; c.classList.remove('prune','o','x'); c.classList.add('disabled');
+      });
+    }, delay);
+  }
+
+  // Move handling
+  function playMove(idx, symbol){
+    if(gameOver || !running) return;
+    if(board[idx]) return;
+    if(!validOrder(symbol)){
+      $('message').textContent = 'Invalid move order — rejected';
+      setTimeout(()=> $('message').textContent = '', 1200);
+      return;
+    }
+    board[idx] = symbol;
+    const cell = document.querySelector(`.cell[data-index="${idx}"]`);
+    if(cell){ cell.textContent = symbol; cell.classList.add('disabled'); cell.classList.remove('pending'); cell.classList.add(symbol==='X'?'x':'o'); cell.setAttribute('aria-pressed','true'); }
+    pending = null; clearTimeout(pendingTimer);
+    const result = checkWin(board);
+    if(result){
+      gameOver = true;
+      handleOutcome(result);
+    } else {
+      current = (symbol==='X') ? 'O' : 'X';
+      $('turnLabel').textContent = current;
+      // safety revert if counts become invalid (shouldn't happen)
+      const c = counts();
+      if(Math.abs(c.X - c.O) > 1){
+        // revert move
+        board[idx] = null;
+        if(cell){ cell.textContent=''; cell.classList.remove('disabled','x','o'); cell.removeAttribute('aria-pressed'); }
+        $('message').textContent = 'Move broke balance — reverted';
+        setTimeout(()=> $('message').textContent = '', 1200);
+        current = symbol;
+        $('turnLabel').textContent = current;
+        return;
+      }
+      // AI turn if applicable
+      if(!gameOver && running && mode !== 'local' && current === 'O'){
+        setTimeout(()=> {
+          if(mode === 'easy') aiRandom();
+          else if(mode === 'normal') aiNormal();
+          else aiHard();
+        }, 420);
+      }
+    }
+  }
+
+  function handleOutcome(res){
+    const {bet, mult} = getBetAndMult();
+    if(res.winner === 'draw'){
+      $('message').textContent = "It's a draw — bet refunded";
+    } else {
+      $('message').textContent = `${res.winner} wins!`;
+      if(res.line) res.line.forEach(i => { const c = document.querySelector(`.cell[data-index="${i}"]`); if(c) c.classList.add('win'); });
+      if(res.winner === 'X'){
+        const payout = (bet>0 && isFinite(bet)) ? bet*mult : 0;
+        netTVA += payout;
+        $('message').textContent += ` You won ${payout.toFixed(2)} TVA.`;
+      } else if(res.winner === 'O'){
+        const loss = (bet>0 && isFinite(bet)) ? bet : 0;
+        netTVA -= loss;
+        $('message').textContent += ` You lost ${loss.toFixed(2)} TVA.`;
+      }
+      pruneLoser(res.winner);
+    }
+    updateNet();
+    qs('.cell').forEach(c=>c.classList.add('disabled'));
+    running = false;
+    $('playAgain').classList.remove('hidden');
+    $('start').classList.add('hidden');
+  }
+
+  // Betting helpers
+  function getBetAndMult(){
+    let bet = parseFloat(($('betAmount').value || '0'));
+    let mult = parseFloat(($('multiplier').value || '1'));
+    if(isNaN(bet)) bet = 0;
+    if(isNaN(mult)) mult = 1;
+    mult = Math.max(1, Math.min(MAX_MULT, mult));
+    return {bet, mult};
+  }
+  function updatePotential(){
+    const {bet,mult} = getBetAndMult();
+    $('multDisplay').textContent = `${mult.toFixed(1)}x`;
+    $('potentialPayout').textContent = (bet>0) ? `$${(bet*mult).toFixed(2)} TVA` : '$0.00 TVA';
+  }
+  function updateNet(){ $('netTVA').textContent = netTVA.toFixed(2); }
+
+  // UI wiring
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Simple start flow
+    $('start').addEventListener('click', ()=>{
+      const {bet} = getBetAndMult();
+      if(!mode){ $('message').textContent = 'Pick a game mode first'; setTimeout(()=> $('message').textContent='', 1400); return; }
+      if(isNaN(bet) || bet <= 0){ $('message').textContent = 'Set a bet amount > 0'; setTimeout(()=> $('message').textContent='', 1400); return; }
+      board = Array(9).fill(null);
+      running = true; gameOver = false;
+      current = starting;
+      qs('.cell').forEach(c => { c.textContent=''; c.classList.remove('disabled','win','x','o','prune'); c.removeAttribute('aria-pressed'); });
+      $('message').textContent = 'Game started — have fun!';
+      $('turnLabel').textContent = current;
+      $('start').classList.add('hidden');
+      $('playAgain').classList.add('hidden');
+      // If AI starts
+      if(mode !== 'local' && starting === 'O'){
+        setTimeout(()=> { if(mode==='easy') aiRandom(); else if(mode==='normal') aiNormal(); else aiHard(); }, 450);
+      }
+    });
+
+    $('playAgain').addEventListener('click', ()=> {
+      $('start').classList.remove('hidden');
+      $('playAgain').classList.add('hidden');
+      // keep mode and bet; ready to start new round
+      resetBoardUI();
+    });
+
+    // mode buttons
+    qs('[data-mode]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        qs('[data-mode]').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        mode = btn.dataset.mode;
+        $('modeLabel').textContent = mode;
+        // set default multiplier
+        const multEl = $('multiplier');
+        if(mode==='easy') multEl.value = DEFAULTS.easy;
+        else if(mode==='normal') multEl.value = DEFAULTS.normal;
+        else if(mode==='hard') multEl.value = DEFAULTS.hard;
+        updatePotential();
+      });
+    });
+
+    // who starts
+    $('start-you').addEventListener('click', ()=> { starting = 'X'; $('start-you').classList.add('selected'); $('start-ai').classList.remove('selected'); });
+    $('start-ai').addEventListener('click', ()=> { starting = 'O'; $('start-ai').classList.add('selected'); $('start-you').classList.remove('selected'); });
+
+    // multiplier & bet input
+    $('multiplier').addEventListener('input', updatePotential);
+    $('betAmount').addEventListener('input', updatePotential);
+
+    // board cell interactions (double-tap for touch)
+    qs('.cell').forEach(cell=>{
+      cell.addEventListener('click', ()=>{
+        if(!running || gameOver) return;
+        const idx = parseInt(cell.dataset.index,10);
+        if(board[idx]) return;
+        if(isTouch){
+          if(pending === idx){
+            clearTimeout(pendingTimer);
+            pending = null;
+            // confirm
+            if(mode === 'local'){ playMove(idx, current); }
+            else { if(current !== 'X') return; playMove(idx, 'X'); }
+          } else {
+            pending = idx;
+            qs('.cell').forEach(c=>c.classList.remove('pending'));
+            cell.classList.add('pending');
+            $('message').textContent = 'Tap again to confirm';
+            pendingTimer = setTimeout(()=> { pending = null; cell.classList.remove('pending'); $('message').textContent = ''; }, 1100);
+          }
+        } else {
+          // immediate on non-touch
+          if(mode === 'local'){ playMove(idx, current); }
+          else { if(current !== 'X') return; playMove(idx, 'X'); }
+        }
+      });
+
+      // keyboard support
+      cell.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          const idx = parseInt(cell.dataset.index,10);
+          if(!running || gameOver) return;
+          if(board[idx]) return;
+          if(mode === 'local'){ playMove(idx, current); }
+          else { if(current !== 'X') return; playMove(idx, 'X'); }
+        }
+      });
+    });
+
+    // quick reset helpers
+    $('netTVA').textContent = netTVA.toFixed(2);
+    updatePotential();
+    resetBoardUI();
+    // signature in console (nice touch)
+    console.info('Miss Minutes AI — powered by @copilot');
+  });
+</script>
+</body>
+</html>
