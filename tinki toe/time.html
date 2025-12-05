@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Miss Minutes — Tic Tac Toe</title>
+
+  <style>
+    :root{
+      --bg:#000000;            /* black background per request */
+      --panel:#0b0b0b;         /* panel black */
+      --accent:#FF8C00;        /* Miss Minutes Orange */
+      --accent-2:#FFA500;
+      --muted:#97A0B3;
+      --glass: rgba(255,255,255,0.03);
+      --success: #16a34a;
+      --danger: #ef4444;
+      --text:#e6e6e6;
+    }
+
+    /* Page layout */
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:var(--bg); color:var(--text)}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .app {
+      width:100%;
+      max-width:1100px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.02);
+      border-radius:12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:18px;
+      padding:20px;
+      background-color: var(--panel);
+    }
+
+    /* Left panel (controls + notepads) */
+    .left {
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .brand {
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo {
+      width:56px;height:56px;border-radius:10px;background:var(--accent);
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#111;
+      font-size:18px;box-shadow:0 4px 14px rgba(255,140,0,0.18);
+    }
+    h1{margin:0;font-size:20px;color:var(--accent-2)}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.02);
+    }
+
+    input[type="password"], input[type="text"] {
+      padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
+      background:transparent;color:var(--text);outline:none;font-size:14px;
+    }
+    .btn {
+      background:var(--accent); color:#08111a; border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;
+    }
+    .btn.secondary{
+      background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.03);
+    }
+    .error{color:var(--danger);font-size:13px}
+
+    /* Board area */
+    .right {
+      display:flex;flex-direction:column;gap:14px;
+    }
+
+    .scoreboard{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .score {
+      background:var(--glass);padding:12px;border-radius:8px;display:flex;gap:8px;align-items:center;
+    }
+    .board-wrap{
+      display:flex;gap:16px;flex-direction:column;align-items:center;
+      padding:12px;border-radius:10px;background:transparent;
+    }
+
+    /* Board / cells */
+    .board{
+      display:grid;grid-template-columns:repeat(3,120px);grid-template-rows:repeat(3,120px);gap:8px;
+      background:transparent;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cell{
+      background:#000;                /* black cells */
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:10px;display:flex;align-items:center;justify-content:center;
+      font-size:44px; cursor:pointer;user-select:none; color:var(--accent-2);
+      transition:transform .12s ease, box-shadow .12s ease, opacity .22s ease;
+      padding:8px;
+      min-width:70px;min-height:70px;
+    }
+    .cell:focus{outline:3px solid rgba(255,140,0,0.12)}
+    .cell:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.45)}
+    .cell.disabled{pointer-events:none;opacity:0.7}
+    .cell.win { background: linear-gradient(90deg, rgba(255,140,0,0.18), rgba(255,140,0,0.06)); box-shadow:0 8px 30px rgba(255,140,0,0.06); }
+    .cell.pending { outline: 3px dashed rgba(255,140,0,0.28); transform: scale(0.98); opacity:0.95; }
+
+    /* X and O color classes */
+    .cell.x { color: var(--accent); font-weight:700; }  /* X in Orange */
+    .cell.o { color: #fff; font-weight:700; }           /* O in white so visible on black */
+
+    /* prune animation */
+    @keyframes prune {
+      0% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
+      60% { opacity: 0.65; transform: scale(0.82) rotate(-6deg); filter: blur(0.6px); }
+      100% { opacity: 0; transform: scale(0.18) rotate(-20deg); filter: blur(2px); }
+    }
+    .prune {
+      animation: prune 700ms cubic-bezier(.2,.9,.3,1) forwards;
+    }
+
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .muted{color:var(--muted)}
+    .hidden{display:none !important}
+
+    @media (max-width:980px){
+      .app{grid-template-columns:1fr;max-width:760px}
+      .board{grid-template-columns:repeat(3,1fr);grid-auto-rows:110px}
+      .cell{font-size:36px}
+      .btn{padding:12px;border-radius:10px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-labelledby="appTitle">
+
+    <!-- LEFT COLUMN -->
+    <div class="left">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">MM</div>
+        <div>
+          <h1 id="appTitle">Miss Minutes — Tic Tac Toe</h1>
+          <p class="lead">Choose a mode, protect the notepads, and have fun!</p>
+        </div>
+      </div>
+
+      <div class="panel password-panel" aria-live="polite">
+        <strong style="color:var(--accent-2)">Enter Key to open the game</strong>
+        <div id="passwordContainer" class="password-container" role="region" aria-label="Game Unlock">
+          <input id="passwordInput" type="password" placeholder="Enter Key" aria-label="Game Key" />
+          <div style="display:flex;gap:8px">
+            <button id="submitPassword" class="btn">Unlock</button>
+            <button id="showTip" class="btn secondary" title="Show contract address">Contract</button>
+          </div>
+          <div id="errorMessage" class="error" role="status" aria-live="assertive"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <strong style="color:var(--accent-2)">Notepads (optional)</strong>
+        <div id="notepadPasswordContainer" class="notepad-password-container">
+          <input id="notepadPasswordInput" type="password" placeholder="Notepad password" aria-label="Notepad password" />
+          <div style="display:flex;gap:8px">
+            <button id="submitNotepadPassword" class="btn">Open Notepads</button>
+            <button id="clearNotepad" class="btn secondary">Clear Local Notes</button>
+          </div>
+          <div id="notepadErrorMessage" class="error"></div>
+        </div>
+
+        <div id="notepads" class="notepads hidden" aria-live="polite">
+          <div class="notepad" id="notepad1">
+            <strong>Notepad 1</strong>
+            <textarea id="notepadContent1" placeholder="Notes will auto save locally"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" data-send="notepadContent1">Send</button>
+              <button class="btn secondary" data-close="notepad1">Close</button>
+            </div>
+          </div>
+          <div class="notepad" id="notepad2">
+            <strong>Notepad 2</strong>
+            <textarea id="notepadContent2" placeholder="Notes will auto save locally"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" data-send="notepadContent2">Send</button>
+              <button class="btn secondary" data-close="notepad2">Close</button>
+            </div>
+          </div>
+          <div class="notepad" id="notepad3">
+            <strong>Notepad 3</strong>
+            <textarea id="notepadContent3" placeholder="Notes will auto save locally"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" data-send="notepadContent3">Send</button>
+              <button class="btn secondary" data-close="notepad3">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Music controls">
+        <strong style="color:var(--accent-2)">Music & Upload</strong>
+        <div id="music-controls" style="margin-top:8px">
+          <button id="play-music-button" class="btn">Play</button>
+          <button id="pause-music-button" class="btn secondary">Pause</button>
+          <button id="stop-music-button" class="btn secondary">Stop</button>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <form id="fileUploadForm" action="https://api.comfyform.com/s/682241fe0bfa4fd8b54a3435/" method="post" enctype="multipart/form-data">
+            <input id="fileUploadInput" name="file" type="file" style="display:none" onchange="document.getElementById('fileUploadForm').submit()" />
+            <button type="button" id="uploadButton" class="btn secondary">Upload File</button>
+          </form>
+          <small class="muted">Optional</small>
+        </div>
+      </div>
+
+      <footer style="margin-top:auto">
+        <p>&copy; 2025 Miss Minutes UI — improved for accessibility and playability.</p>
+      </footer>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right">
+      <div class="scoreboard">
+        <div class="score">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Score</div>
+            <div style="font-size:18px;font-weight:700">
+              <span id="player-score">0</span> — <span id="ai-score">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="level-1" class="btn secondary" data-mode="easy">Easy</button>
+          <button id="level-2" class="btn secondary" data-mode="normal">Normal</button>
+          <button id="level-3" class="btn" data-mode="ai">Play with Miss Minutes</button>
+          <button id="play-with-friend" class="btn secondary" data-mode="local">Play with a friend</button>
+          <button id="start-game" class="btn hidden">Start Game</button>
+          <button id="play-again" class="btn hidden">Play Again</button>
+        </div>
+
+        <!-- Start-options for selecting who starts -->
+        <div id="start-options" class="controls hidden" style="margin-top:8px;align-items:center">
+          <span class="muted" style="margin-right:8px">Who starts?</span>
+          <button id="start-you" class="btn">You</button>
+          <button id="start-ai" class="btn secondary">Miss Minutes</button>
+        </div>
+      </div>
+
+      <div class="board-wrap panel" aria-live="polite">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div id="game-info">Press a mode, then Start Game</div>
+          <div id="turn-info" class="muted">Turn: —</div>
+        </div>
+
+        <div id="board" class="board" role="grid" aria-label="Tic Tac Toe board">
+          <!-- 9 cells -->
+          <div class="cell" tabindex="0" data-index="0" role="button" aria-label="cell 0"></div>
+          <div class="cell" tabindex="0" data-index="1" role="button" aria-label="cell 1"></div>
+          <div class="cell" tabindex="0" data-index="2" role="button" aria-label="cell 2"></div>
+          <div class="cell" tabindex="0" data-index="3" role="button" aria-label="cell 3"></div>
+          <div class="cell" tabindex="0" data-index="4" role="button" aria-label="cell 4"></div>
+          <div class="cell" tabindex="0" data-index="5" role="button" aria-label="cell 5"></div>
+          <div class="cell" tabindex="0" data-index="6" role="button" aria-label="cell 6"></div>
+          <div class="cell" tabindex="0" data-index="7" role="button" aria-label="cell 7"></div>
+          <div class="cell" tabindex="0" data-index="8" role="button" aria-label="cell 8"></div>
+        </div>
+
+        <div id="message" style="margin-top:12px;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tip modal (hidden by default) -->
+  <div id="tipModal" class="tip-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tipTitle" style="display:none;">
+    <h3 id="tipTitle">Miss Minutes Contract Address</h3>
+    <p style="word-break:break-all;color:var(--muted)">GGF2SUiwWnBqzuAZjx4pZcqBNFstNgRgQM8PCXM3pump</p>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+      <button id="closeTip" class="btn secondary">Close</button>
+    </div>
+  </div>
+
+  <!-- Audio (optional) -->
+  <audio id="background-music" loop preload="auto">
+    <source src="can.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="you-win-audio" src="audio/you_win.wav" preload="auto"></audio>
+  <audio id="i-win-audio" src="audio/i_win.wav" preload="auto"></audio>
+  <audio id="draw-audio" src="audio/draw.wav" preload="auto"></audio>
+
+<script>
+  // -------- Configuration ----------
+  const GAME_KEY = "love";          // unlock game
+  const NOTEPAD_KEY = "love";       // unlock notepads
+  const NOTEPAD_SEND_URL = "https://api.comfyform.com/s/67d22b9a26da4737ba026920/";
+
+  // -------- State ----------
+  let gameMode = null; // 'easy'|'normal'|'ai'|'local'
+  let boardState = Array(9).fill(null);
+  let currentPlayer = 'X';
+  let startingPlayer = 'X';
+  let gameOver = false;
+  let gameStarted = false;
+  let playerScore = 0, aiScore = 0;
+
+  // mobile double-tap confirmation
+  const touchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  let pendingIndex = null;
+  let pendingTimeout = null;
+
+  // -------- Helpers ----------
+  const $ = id => document.getElementById(id);
+  const qs = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  function showTempMessage(text, ms = 1500){
+    const el = $('message');
+    el.textContent = text;
+    if(ms > 0) setTimeout(()=> { if(el.textContent === text) el.textContent = ''; }, ms);
+  }
+
+  function clearPending(){
+    if(pendingTimeout) { clearTimeout(pendingTimeout); pendingTimeout = null; }
+    if(pendingIndex !== null){
+      const pendingCell = document.querySelector(`.cell[data-index="${pendingIndex}"]`);
+      if(pendingCell) pendingCell.classList.remove('pending');
+      pendingIndex = null;
+      $('message').textContent = '';
+    }
+  }
+
+  function resetBoardUI(){
+    clearPending();
+    const cells = qs('.cell');
+    cells.forEach(c => { c.textContent=''; c.classList.remove('disabled','win','pending','x','o','prune'); c.removeAttribute('aria-pressed'); });
+  }
+  function updateScores(){ $('player-score').textContent = playerScore; $('ai-score').textContent = aiScore; }
+
+  function countsState(){
+    return boardState.reduce((acc, val) => {
+      if(val === 'X') acc.X++;
+      else if(val === 'O') acc.O++;
+      return acc;
+    }, {X:0, O:0});
+  }
+
+  function validMoveOrder(symbol){
+    // robust validation:
+    // When X plays, X count must equal O count.
+    // When O plays, X count must be exactly one more than O count.
+    const c = countsState();
+    if(symbol === 'X') return (c.X === c.O);
+    if(symbol === 'O') return (c.X === c.O + 1);
+    return false;
+  }
+
+  function checkWin(b){
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    for(const w of wins){
+      const [a,bi,c] = w;
+      if(b[a] && b[a] === b[bi] && b[a] === b[c]) return {winner: b[a], line:w};
+    }
+    if(b.every(x=>x)) return {winner: 'draw'};
+    return null;
+  }
+
+  function aiMoveRandom(){
+    const empties = boardState.map((v,i)=>v?null:i).filter(x=>x!==null);
+    if(!empties.length) return;
+    const idx = empties[Math.floor(Math.random()*empties.length)];
+    makeMove(idx, 'O');
+  }
+
+  function aiMoveNormal(){
+    const empties = boardState.map((v,i)=>v?null:i).filter(x=>x!==null);
+    const tryMove = (sym, idx) => {
+      const tmp = boardState.slice(); tmp[idx]=sym;
+      return checkWin(tmp);
+    };
+    for(const i of empties){
+      const res = tryMove('O', i);
+      if(res && res.winner === 'O'){ makeMove(i,'O'); return; }
+    }
+    for(const i of empties){
+      const res = tryMove('X', i);
+      if(res && res.winner === 'X'){ makeMove(i,'O'); return; }
+    }
+    aiMoveRandom();
+  }
+
+  function pruneOpponents(winner) {
+    // animate and remove the losing marks (prune)
+    const opponent = (winner === 'X') ? 'O' : 'X';
+    const cellsToPrune = qs('.cell').filter(c => c.textContent === opponent);
+    if(!cellsToPrune.length) return;
+    // stagger animation slightly for nice effect
+    cellsToPrune.forEach((cell, i) => {
+      setTimeout(() => {
+        cell.classList.add('prune');
+      }, i * 80);
+    });
+    // after animation, actually remove the opponent marks from boardState and UI
+    const totalDelay = 700 + (cellsToPrune.length * 80) + 60;
+    setTimeout(() => {
+      cellsToPrune.forEach((cell) => {
+        const idx = parseInt(cell.getAttribute('data-index'), 10);
+        if(!isNaN(idx) && boardState[idx] === opponent){
+          boardState[idx] = null;
+        }
+        cell.textContent = '';
+        cell.classList.remove('prune', 'o', 'x');
+        cell.classList.add('disabled'); // keep disabled after prune so winner remains visible and board isn't clickable
+      });
+    }, totalDelay);
+  }
+
+  function makeMove(index, symbol){
+    // basic guard
+    if(gameOver || !gameStarted) return;
+    if(boardState[index]) return;
+
+    // validate move order and counts
+    if(!validMoveOrder(symbol)){
+      showTempMessage('Invalid move order — move rejected', 1600);
+      return;
+    }
+
+    // protect against fast double moves
+    const lastCounts = countsState();
+    // attempt move
+    boardState[index] = symbol;
+    const cell = document.querySelector(`.cell[data-index="${index}"]`);
+    if(cell) {
+      cell.textContent = symbol;
+      cell.classList.add('disabled');
+      cell.classList.remove('pending');
+      // add symbol class for styling
+      cell.classList.remove('x','o');
+      cell.classList.add(symbol === 'X' ? 'x' : 'o');
+      cell.setAttribute('aria-pressed','true');
+    }
+    clearPending();
+    const res = checkWin(boardState);
+    if(res){
+      gameOver = true;
+      handleResult(res);
+    } else {
+      // switch player
+      currentPlayer = (symbol === 'X') ? 'O' : 'X';
+      $('turn-info').textContent = `Turn: ${currentPlayer}`;
+      // If invalid counts somehow now occur (safety), revert move
+      const afterCounts = countsState();
+      if(Math.abs(afterCounts.X - afterCounts.O) > 1){
+        // revert move
+        boardState[index] = null;
+        if(cell){
+          cell.textContent = '';
+          cell.classList.remove('disabled','x','o');
+          cell.removeAttribute('aria-pressed');
+        }
+        showTempMessage('Move would break game balance — reverted', 1600);
+        // restore currentPlayer
+        currentPlayer = symbol;
+        $('turn-info').textContent = `Turn: ${currentPlayer}`;
+        return;
+      }
+      // AI turn if applicable
+      if(!gameOver && gameStarted && gameMode && gameMode !== 'local' && currentPlayer === 'O'){
+        setTimeout(()=> {
+          if(gameMode === 'easy') aiMoveRandom();
+          else aiMoveNormal();
+        }, 420);
+      }
+    }
+  }
+
+  function handleResult(result){
+    const msgEl = $('message');
+    if(result.winner === 'draw'){
+      msgEl.textContent = "It's a draw!";
+      $('draw-audio')?.play?.();
+    } else {
+      msgEl.textContent = `${result.winner} wins!`;
+      // highlight winning line
+      if(result.line && Array.isArray(result.line)){
+        result.line.forEach(i => {
+          const cell = document.querySelector(`.cell[data-index="${i}"]`);
+          if(cell) cell.classList.add('win');
+        });
+      }
+      if(result.winner === 'X'){
+        playerScore++;
+        $('you-win-audio')?.play?.();
+      } else if(result.winner === 'O'){
+        aiScore++;
+        $('i-win-audio')?.play?.();
+      }
+      // prune opponent marks with animation
+      pruneOpponents(result.winner);
+    }
+    updateScores();
+    // disable remaining cells to prevent further play until next round
+    qs('.cell').forEach(c => c.classList.add('disabled'));
+    $('play-again').classList.remove('hidden');
+    $('start-game').classList.add('hidden');
+    gameStarted = false;
+  }
+
+  function startGame(){
+    if(!gameMode){
+      $('game-info').textContent = 'Please choose a mode first';
+      return;
+    }
+    boardState = Array(9).fill(null);
+    currentPlayer = startingPlayer;
+    gameOver = false;
+    gameStarted = true;
+    resetBoardUI();
+    $('turn-info').textContent = `Turn: ${currentPlayer}`;
+    $('message').textContent = '';
+    $('play-again').classList.add('hidden');
+    $('start-game').classList.add('hidden');
+    // If AI starts in AI mode
+    if(gameMode !== 'local' && startingPlayer === 'O'){
+      setTimeout(()=> {
+        if(gameMode === 'easy') aiMoveRandom();
+        else aiMoveNormal();
+      }, 450);
+    }
+    const firstCell = document.querySelector('.cell[data-index="0"]');
+    if(firstCell) firstCell.focus();
+  }
+
+  function resetScores(){
+    playerScore = 0; aiScore = 0; updateScores();
+  }
+
+  // -------- Notepad helpers ----------
+  function loadNotepads(){
+    [1,2,3].forEach(i=>{
+      const key = `notepadContent${i}`;
+      const saved = localStorage.getItem(key);
+      if(saved) $(key).value = saved;
+    });
+  }
+  function autoSaveNotepad(i){
+    const key = `notepadContent${i}`;
+    localStorage.setItem(key, $(key).value);
+  }
+  function clearNotepadsLocal(){
+    [1,2,3].forEach(i => localStorage.removeItem(`notepadContent${i}`));
+    loadNotepads();
+  }
+  function sendNotepadContentById(id){
+    const content = $(id).value || '';
+    const form = document.createElement('form');
+    form.action = NOTEPAD_SEND_URL;
+    form.method = 'post';
+    form.style.display = 'none';
+    const textarea = document.createElement('textarea');
+    textarea.name = 'notepadContent';
+    textarea.value = content;
+    form.appendChild(textarea);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // -------- Event binding on load ----------
+  document.addEventListener('DOMContentLoaded', () => {
+    // show password input area initially
+    $('passwordContainer').style.display = 'flex';
+
+    // Password actions
+    $('submitPassword').addEventListener('click', ()=> {
+      const v = $('passwordInput').value || '';
+      if(v.trim() === GAME_KEY){
+        $('passwordContainer').style.display = 'none';
+        $('errorMessage').textContent = '';
+        $('game-info').textContent = "Choose a mode and press Start Game";
+      } else {
+        $('errorMessage').textContent = 'Incorrect password. Please try again.';
+        setTimeout(()=> { $('errorMessage').textContent = ''; }, 2000);
+      }
+    });
+
+    // Tip modal
+    $('showTip').addEventListener('click', ()=> { $('tipModal').style.display = 'block'; });
+    $('closeTip').addEventListener('click', ()=> { $('tipModal').style.display = 'none'; });
+
+    // Notepad password
+    $('submitNotepadPassword').addEventListener('click', ()=>{
+      const v = $('notepadPasswordInput').value || '';
+      if(v.trim() === NOTEPAD_KEY){
+        $('notepadPasswordContainer').classList.add('hidden');
+        $('notepads').classList.remove('hidden');
+        $('notepadErrorMessage').textContent = '';
+        loadNotepads();
+      } else {
+        $('notepadErrorMessage').textContent = 'Incorrect password for notepads.';
+        setTimeout(()=> { $('notepadErrorMessage').textContent = ''; }, 2000);
+      }
+    });
+
+    $('clearNotepad').addEventListener('click', ()=>{
+      clearNotepadsLocal();
+      $('notepadErrorMessage').textContent = 'Local notes cleared.';
+      setTimeout(()=> $('notepadErrorMessage').textContent = '', 2000);
+    });
+
+    // Notepad auto-save and send/close buttons
+    qs('[data-send]').forEach(btn => {
+      btn.addEventListener('click', e => sendNotepadContentById(btn.getAttribute('data-send')));
+    });
+    qs('[data-close]').forEach(btn => {
+      btn.addEventListener('click', e => $(btn.getAttribute('data-close')).classList.add('hidden'));
+    });
+    [1,2,3].forEach(i => {
+      const el = $(`notepadContent${i}`);
+      if(el){
+        el.addEventListener('input', ()=> autoSaveNotepad(i));
+      }
+    });
+
+    // Music controls
+    const music = $('background-music');
+    $('play-music-button').addEventListener('click', ()=> music.play().catch(()=>{}));
+    $('pause-music-button').addEventListener('click', ()=> music.pause());
+    $('stop-music-button').addEventListener('click', ()=> { music.pause(); music.currentTime = 0; });
+
+    // Upload button opens file chooser
+    $('uploadButton').addEventListener('click', ()=> $('fileUploadInput').click());
+
+    // Mode buttons
+    const modeButtons = qs('[data-mode]');
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        gameMode = btn.getAttribute('data-mode');
+        $('game-info').textContent = `Mode: ${gameMode}. Press Start to begin.`;
+        $('start-game').classList.remove('hidden');
+        $('play-again').classList.add('hidden');
+        $('start-options').classList.remove('hidden');
+        // default starting player visually select 'You'
+        $('start-you').classList.add('selected');
+        $('start-ai').classList.remove('selected');
+        startingPlayer = 'X';
+      });
+    });
+
+    // Who starts buttons
+    $('start-you').addEventListener('click', ()=> {
+      startingPlayer = 'X';
+      $('start-you').classList.add('selected');
+      $('start-ai').classList.remove('selected');
+    });
+    $('start-ai').addEventListener('click', ()=> {
+      startingPlayer = 'O';
+      $('start-ai').classList.add('selected');
+      $('start-you').classList.remove('selected');
+    });
+
+    // Start and Play Again
+    $('start-game').addEventListener('click', startGame);
+    $('play-again').addEventListener('click', ()=> {
+      startGame();
+      $('play-again').classList.add('hidden');
+    });
+
+    // Board cell interactions
+    qs('.cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        if(!gameStarted || gameOver || !gameMode) return;
+        const idx = parseInt(cell.getAttribute('data-index'),10);
+        if(boardState[idx]) return;
+
+        if(touchDevice){
+          // require double-tap to confirm on touch devices to avoid accidental taps
+          if(pendingIndex === idx){
+            clearPending();
+            if(gameMode === 'local'){
+              makeMove(idx, currentPlayer);
+            } else {
+              if(currentPlayer !== 'X') return;
+              makeMove(idx, 'X');
+            }
+          } else {
+            clearPending();
+            pendingIndex = idx;
+            const pendingCell = document.querySelector(`.cell[data-index="${idx}"]`);
+            if(pendingCell) pendingCell.classList.add('pending');
+            $('message').textContent = 'Tap again to confirm move';
+            pendingTimeout = setTimeout(clearPending, 1200);
+          }
+        } else {
+          // Non-touch immediate behavior
+          if(gameMode === 'local'){
+            makeMove(idx, currentPlayer);
+          } else {
+            if(currentPlayer !== 'X') return;
+            makeMove(idx, 'X');
+          }
+        }
+      });
+
+      // keyboard support: Enter or Space to play (confirm immediately)
+      cell.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          if(!gameStarted || gameOver || !gameMode) return;
+          const idx = parseInt(cell.getAttribute('data-index'),10);
+          if(boardState[idx]) return;
+          if(gameMode === 'local'){
+            makeMove(idx, currentPlayer);
+          } else {
+            if(currentPlayer !== 'X') return;
+            makeMove(idx, 'X');
+          }
+        }
+      });
+    });
+
+    // allow clicking on scoreboard control to reset scores (optional)
+    qs('.score').forEach(s => s.addEventListener('dblclick', ()=> { resetScores(); $('message').textContent = 'Scores reset'; setTimeout(()=> $('message').textContent = '', 2000); }));
+
+    // initialize UI
+    updateScores();
+    resetBoardUI();
+  });
+
+  // small helper to toggle tip modal for compatibility
+  function toggleTip(show){
+    const modal = $('tipModal');
+    if(show === undefined) show = modal.style.display === 'none' || !modal.style.display;
+    modal.style.display = show ? 'block' : 'none';
+  }
+
+  // expose some functions for debugging in console if needed
+  window.MissMinutes = {
+    startGame, makeMove, checkWin, resetScores, toggleTip
+  };
+</script>
+</body>
+</html>
